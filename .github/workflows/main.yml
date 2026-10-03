@@ -1,0 +1,46 @@
+name: Compilar Celta Central
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Instalar XcodeGen
+        run: brew install xcodegen
+
+      - name: Gerar projeto Xcode
+        run: xcodegen generate
+
+      - name: Mostrar simuladores disponíveis
+        run: xcrun simctl list devices available
+
+      - name: Compilar Celta Central
+        run: |
+          xcodebuild \
+            -project CeltaCentral.xcodeproj \
+            -scheme CeltaCentral \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Localizar aplicativo compilado
+        run: |
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "CeltaCentral.app" -type d | head -1)
+          echo "Aplicativo encontrado em: $APP_PATH"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" CeltaCentral-Simulator.zip
+
+      - name: Salvar aplicativo
+        uses: actions/upload-artifact@v4
+        with:
+          name: CeltaCentral-iPad
+          path: CeltaCentral-Simulator.zip
