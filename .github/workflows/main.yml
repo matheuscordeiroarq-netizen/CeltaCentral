@@ -20,10 +20,7 @@ jobs:
       - name: Gerar projeto Xcode
         run: xcodegen generate
 
-      - name: Mostrar simuladores disponíveis
-        run: xcrun simctl list devices available
-
-      - name: Compilar Celta Central
+      - name: Testar compilacao no simulador
         run: |
           xcodebuild \
             -project CeltaCentral.xcodeproj \
@@ -33,14 +30,33 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build
 
-      - name: Localizar aplicativo compilado
+      - name: Compilar para iPad fisico sem assinatura
         run: |
-          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "CeltaCentral.app" -type d | head -1)
-          echo "Aplicativo encontrado em: $APP_PATH"
-          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" CeltaCentral-Simulator.zip
+          xcodebuild \
+            -project CeltaCentral.xcodeproj \
+            -scheme CeltaCentral \
+            -sdk iphoneos \
+            -configuration Release \
+            -derivedDataPath build-device \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
 
-      - name: Salvar aplicativo
+      - name: Criar pacote para assinatura
+        run: |
+          APP_PATH=$(find build-device -name "CeltaCentral.app" -type d | head -1)
+
+          if [ -z "$APP_PATH" ]; then
+            echo "CeltaCentral.app nao encontrado"
+            exit 1
+          fi
+
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/CeltaCentral.app
+          zip -r CeltaCentral-Unsigned.ipa Payload
+
+      - name: Salvar IPA
         uses: actions/upload-artifact@v4
         with:
-          name: CeltaCentral-iPad
-          path: CeltaCentral-Simulator.zip
+          name: CeltaCentral-iPad-Unsigned
+          path: CeltaCentral-Unsigned.ipa
