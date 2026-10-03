@@ -1,0 +1,9 @@
+{
+  "name": "Celta Central",
+  "short_name": "Celta Central",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#e9edf1",
+  "theme_color": "#eef1f4"
+}
