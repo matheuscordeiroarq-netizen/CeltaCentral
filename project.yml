@@ -1,0 +1,17 @@
+name: CeltaCentral
+options:
+  bundleIdPrefix: com.celtacentral
+targets:
+  CeltaCentral:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - CeltaCentral
+    info:
+      path: CeltaCentral/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.celtacentral.app
+        TARGETED_DEVICE_FAMILY: "2"
+        SWIFT_VERSION: "5.0"
